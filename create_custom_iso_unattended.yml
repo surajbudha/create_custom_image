@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  gather_facts: yes
+  become: yes
+  
+  
+  vars:
+    flavour: "ubuntu"
+    version: "24.04"
+    ansible_python_interpreter: /usr/bin/python3
+    iso_mount_path: /mnt/iso
+    iso_download_url: "https://releases.ubuntu.com/24.04.3/ubuntu-24.04.3-live-server-amd64.iso"
+    iso_download_dest: "/tmp/{{ flavour }}_{{ version }}.iso"
+    iso_output_path: "/var/www/html/{{ flavour }}_{{ version }}_unattended.iso"
+    iso_extract_path: "/tmp/{{ flavour }}_{{ version }}_extracted"
+  
+  tasks:
+    - name: Include role for custom iso creation
+      include_role:
+        name: create_custom_iso_unattended
+  
+      
+
+...

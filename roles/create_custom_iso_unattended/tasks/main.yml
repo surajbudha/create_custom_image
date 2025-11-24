@@ -1,0 +1,21 @@
+---
+- name: Prepare and mount base ISO
+  block:
+    - name: Do prepwork for ISO creation
+      include_tasks: prepwork.yml
+      register: prepwork
+
+    - name: Create unattended ISO
+      include_tasks: create_ubuntu_iso.yml
+      when: prepwork is succeeded and flavour == "ubuntu"
+    
+    - name: Cleanup after prepwork failure
+      include_tasks: cleanup.yml
+
+  rescue:
+    - name: Cleanup after prepwork failure
+      include_tasks: cleanup.yml
+    
+    - name: Fail the task
+      ansible.builtin.fail:
+        msg: "Failed to create ISO."
