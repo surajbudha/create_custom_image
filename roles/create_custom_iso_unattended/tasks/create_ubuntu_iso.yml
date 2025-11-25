@@ -1,1 +1,43 @@
 ---
+#Create and copy autoinstall file to the extracted ISO directory
+- name: copy autoinstall file
+  template:
+    src: autoinstall.yaml
+    dest: "{{ iso_extract_path }}/autoinstall.yaml"
+
+#Modify grub configuration to use autoinstall file
+- name: Modify grub configuration to use autoinstall file
+  blockinfile:
+    path: "{{ iso_extract_path }}/boot/grub/grub.cfg"
+    insertbefore: '^menuentry "Try or Install Ubuntu Server"'
+    block: |
+      menuentry "Install Ubuntu with Autoinstall" {
+          set gfxpayload=keep
+          linux   /casper/vmlinuz autoinstall ds=nocloud\;s=/autoinstall.yaml quiet splash ---
+          initrd  /casper/initrd
+      }
+
+#Recreate ISO with autoinstall file
+- name: Recreate ISO with autoinstall file
+  shell: >
+    cd {{ iso_extract_path }} &&
+    sudo 
+    xorriso 
+    -as mkisofs 
+    -r 
+    -V "MY_CUSTOM_UBUNTU_ISO" 
+    -o {{ iso_output_path }} 
+    -J 
+    -l 
+    -b boot/grub/i386-pc/eltorito.img 
+    -c boot.catalog 
+    -no-emul-boot 
+    -boot-load-size 4 
+    -boot-info-table
+    .
+  when: flavour == "ubuntu" or flavour == "debian" or flavour == "linuxmint"
+  register: iso_creation
+
+- name: Debug ISO creation result
+  debug:
+    var: iso_creation.stdout

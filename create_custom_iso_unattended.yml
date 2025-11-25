@@ -7,14 +7,31 @@
   vars:
     flavour: "ubuntu"
     version: "24.04"
+    working_dir: "/tmp/{{ flavour }}_{{ version }}_workdir"
     ansible_python_interpreter: /usr/bin/python3
     iso_mount_path: /mnt/iso
     iso_download_url: "https://releases.ubuntu.com/24.04.3/ubuntu-24.04.3-live-server-amd64.iso"
     iso_download_dest: "/tmp/{{ flavour }}_{{ version }}.iso"
-    iso_output_path: "/var/www/html/{{ flavour }}_{{ version }}_unattended.iso"
-    iso_extract_path: "/tmp/{{ flavour }}_{{ version }}_extracted"
-  
+    iso_output_path: "/var/www/html/isos/{{ flavour }}_{{ version }}_unattended.iso"
+    iso_extract_path: "{{ working_dir }}"
+    network_ip: "192.168.122.46"
+    network_cidr: "24"
+    default_gateway: "192.168.122.1"
+    default_user: "ubuntu"
+    default_name: "ubuntu"
+    defult_hostname: "ubuntu-base"
+    default_user_password: "$6$yyJVbiyTp2n5bHhp$XKIHL3VaMsl9RyqI0B9Ux3rW4lcwgEpeMjlNZH4/8YhF18LQ40om0ZH/n1Dy260aBPs1UrFz24L4T/oHFekSk."
+    default_ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOf3tJf45hHZFg/t96BnbQt8rHIQdQ/97o67XbgailYW suraj@HP-EliteBook"
+    boot_size: 2147483648B  # 2GB
+    swap_size: 2147483648B  # 2GB
+
+
+
   tasks:
+    - debug:
+        msg: "{{ boot_size }}"
+        
+          
     - name: Include role for custom iso creation
       include_role:
         name: create_custom_iso_unattended
