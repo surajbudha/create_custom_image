@@ -1,0 +1,32 @@
+---
+# Cleanup tasks after ISO creation or on failure
+#Unmount ISO
+- name: Unmount ISO
+  mount:
+    path: "{{ iso_mount_path }}"
+    state: unmounted
+
+#Delete mount directory
+- name: delete mount directory
+  file:
+    path: "{{ iso_mount_path }}"
+    state: absent
+
+#Delete extracted file and it's directory
+- name: delete extracted ISO directory
+  file:
+    path: "{{ iso_extract_path }}"
+    state: absent
+
+#Delete working directory
+- name: delete working directory
+  file:
+    path: "{{ working_dir }}"
+    state: absent
+
+#Delete downloaded ISO
+- name: delete downloaded ISO
+  file:
+    path: "{{ iso_download_dest }}"
+    state: absent
+...

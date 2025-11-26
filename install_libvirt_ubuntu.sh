@@ -1,5 +1,13 @@
 #!/bin/bash
+# Install terraform on linux systems
+# Authors: Suraj Budha Thoki
+# Date: 2024-06-10
+# Version: 1.0
 
+set -e
+os_family="unknown"
+
+# Determine OS family
 if [[ -f /etc/os-release ]]
   then
   echo "test"

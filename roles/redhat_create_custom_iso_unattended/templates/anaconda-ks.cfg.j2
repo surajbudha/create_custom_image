@@ -1,0 +1,97 @@
+#version=RHEL8
+# Generated automatically via Ansible
+
+#installation source
+cdrom
+
+# Use text mode installation
+# for text mode installation, set installation_mode to 'text' in create_custom_iso_unattended.yml
+{{ installation_mode | default('graphical') }}
+# System authorization information
+authselect auto
+
+repo --name="Minimal" --baseurl=file:///run/install/sources/mount-0000-cdrom/minimal
+
+# Not required for minimal installation
+#%packages
+#@^minimal-environment
+#%end
+
+# Keyboard layouts
+keyboard --xlayouts='de','us'
+
+# System language
+lang {{ system_language | default('en_US.UTF-8') }}
+
+# Network information
+network --bootproto=static --device=enp1s0 --gateway={{ default_gateway }} --ip={{ network_ip }} --nameserver={{ default_nameservers }} --netmask=255.255.255.0 --ipv6=auto --activate
+
+network  --hostname=redhat-base
+
+# Use CDROM installation media
+cdrom
+
+# Run the Setup Agent on first boot
+firstboot --enable
+
+ignoredisk --only-use=vda
+# System bootloader configuration
+bootloader --append="crashkernel=auto" --location=mbr --boot-drive={{ boot_drive | default('/dev/vda') }}
+
+# Partition clearing information
+clearpart --none --initlabel
+
+# Disk partitioning information
+part pv.2337 --fstype="lvmpv" --ondisk=vda --size=18431
+
+part /boot --fstype="ext4" --ondisk=vda --size={{ boot_size | default('2048') }} --label=boot
+
+volgroup vg_sys_redhat --pesize=4096 pv.2337
+
+logvol / --fstype="ext4" --grow --size=1 --label="root" --name=lv_root --vgname=vg_sys_redhat
+
+logvol swap --fstype="swap" --size={{ swap_size | default('2048') }} --name=lv_swap --vgname=vg_sys_redhat
+
+# System timezone
+timezone {{ default_timezone | default('Europe/Berlin') }}
+
+# Root password
+rootpw --iscrypted {{ root_password | default('$6$ieJsJXhSAf/QQC5t$05qbSBK.a0/KNGCHbcp7WoJIclkueKwNN0Afo/2v.ODjye.MvClRei596hm4bEsg.DteC4ECD1/Q0zAO0LGeY/') }}
+user --name={{ default_user }} --password={{ default_user_password }} --iscrypted --gecos="{{ default_user }}" --groups=wheel --shell=/bin/bash --uid=1000
+
+%post --log=/var/log/anaconda/post-install.log
+
+# Enable SSH password authentication
+sed -i 's/^#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+systemctl enable sshd
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+systemctl restart sshd
+
+# Add SSH public key for root user
+mkdir -p /root/.ssh
+echo "{{ default_ssh_public_key }}" >> /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
+chmod 700 /root/.ssh
+
+# Add SSH public key for default user
+mkdir -p /home/{{ default_user }}/.ssh
+echo "{{ default_ssh_public_key }}" >> /home/{{ default_user }}/.ssh/authorized_keys
+chown {{ default_user }}:{{ default_user }} /home/{{ default_user }}/.ssh -R
+chmod 600 /home/{{ default_user }}/.ssh/authorized_keys
+chmod 700 /home/{{ default_user }}/.ssh
+
+%end
+
+# SELinux
+selinux --permissive
+
+# Firewall
+firewall --enabled --service=ssh
+
+# Reboot after install
+reboot
+
+%addon com_redhat_kdump --enable --reserve-mb='auto'
+
+%end
+# End of file
