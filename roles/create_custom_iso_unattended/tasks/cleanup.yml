@@ -13,8 +13,20 @@
     state: absent
 
 #Delete extracted file and it's directory
-#- name: delete extracted ISO directory
-#  file:
-#    path: "{{ iso_extract_path }}"
-#    state: absent
+- name: delete extracted ISO directory
+  file:
+    path: "{{ iso_extract_path }}"
+    state: absent
+
+#Delete working directory
+- name: delete working directory
+  file:
+    path: "{{ working_dir }}"
+    state: absent
+
+#Delete downloaded ISO
+- name: delete downloaded ISO
+  file:
+    path: "{{ iso_download_dest }}"
+    state: absent
 ...
