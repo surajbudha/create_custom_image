@@ -1,0 +1,60 @@
+---
+# Create and anaconda kickstart file for unattended installation
+- name: Create and anaconda kickstart file
+  template:
+    src: anaconda-ks.cfg.j2
+    dest: "{{ iso_extract_path }}/ks.cfg"
+
+# Comment out default menu entry
+- name: Comment out pipeline archive in fstab
+  replace:
+    dest: "{{ iso_extract_path }}/isolinux/isolinux.cfg"
+    regexp: '^  menu default'
+    replace: '#  menu default'
+
+# Modify timeout to 1 second
+- name: Comment out pipeline archive in fstab
+  replace:
+    dest: "{{ iso_extract_path }}/isolinux/isolinux.cfg"
+    regexp: 'timeout 600'
+    replace: 'timeout 1'
+
+- name: Modify grub configuration to use kickstart file
+  blockinfile:
+    path: "{{ iso_extract_path }}/isolinux/isolinux.cfg"
+    insertbefore: "^label linux"
+    append_newline: yes
+    block: |
+      label linux_autoinstall
+        menu label ^Install Rocky Linux 9.6 Kickstart
+        menu default
+        kernel vmlinuz
+        append initrd=initrd.img inst.stage2=cdrom inst.ks=cdrom:/ks.cfg quiet
+
+
+# Recreate ISO with kickstart file
+- name: Recreate ISO with kickstart file
+  shell: >
+    cd {{ iso_extract_path }} &&
+    sudo 
+    mkisofs 
+    -o /var/www/html/isos/rocky_9.6_unattended.iso
+    -b isolinux/isolinux.bin
+    -c isolinux/boot.cat
+    -no-emul-boot
+    -boot-load-size 4
+    -boot-info-table
+    -eltorito-alt-boot
+    -e images/efiboot.img
+    -no-emul-boot
+    -iso-level 3 
+    -J
+    -R
+    -V "Rocky Linux Custom"
+    .
+  when: flavour == "redhat" or flavour == "rocky" or flavour == "almalinux" or flavour == "centos"
+  register: iso_creation
+
+- name: Debug ISO creation result
+  debug:
+    var: iso_creation.stdout

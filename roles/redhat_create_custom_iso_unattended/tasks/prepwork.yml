@@ -1,0 +1,82 @@
+# Install required packages for the ISO creation
+- debug:
+    msg: "{{ ansible_facts['os_family'] }}"
+
+#Install required apt packages
+- name: Install required packages
+  package:
+    name:
+      - apache2
+      - isolinux
+      - genisoimage
+      - wget
+      - xorriso
+      - p7zip-full
+      - p7zip-rar
+    state: present
+  when: ansible_facts['os_family'] == "Debian"
+
+#install required snap packages
+- name: Install required snap packages
+  snap:
+    name: "{{ item }}"
+    state: present
+    classic: yes
+  loop:
+    - ubuntu-image
+  when: ansible_facts['os_family'] == "Debian"
+
+# Ensure mount path exists for the iso
+- name: Ensure mount directory exists
+  file:
+    path: "{{ iso_mount_path }}"
+    state: directory
+
+# Check if the ISO is already downloaded
+- name: Check if ISO is already downloaded
+  stat:
+    path: "{{ iso_download_dest }}"
+  register: iso_stat
+
+- debug:
+    msg: "ISO exists: {{ iso_stat }}"
+
+- name: set download_needed fact
+  set_fact:
+    download_needed: "{{ not iso_stat.stat.exists }}"
+
+- name: Debug download_needed
+  debug:
+    msg: "Download needed: {{ download_needed }}"
+
+#Download the ISO
+- name: Download base ISO
+  ansible.builtin.get_url:
+    url: "{{ iso_download_url }}"
+    dest: "{{ iso_download_dest }}"
+  when: download_needed
+
+# Mount ISO
+#- name: Mount base ISO
+#  mount:
+#    path: "{{ iso_mount_path }}"
+#    src: "{{ iso_download_dest }}"
+#    #dest: "{{ iso_mount_path }}"
+#    fstype: iso9660
+#    state: mounted
+
+# Ensure extraction path exists
+- name: Ensure extraction directory exists
+  file:
+    path: "{{ iso_extract_path }}"
+    state: directory
+
+# Extract ISO contents
+- name: Extract ISO contents
+  command: >
+    7z x -y {{ iso_download_dest }} -o{{ iso_extract_path }}
+  register: extract_result
+
+- debug:
+    msg: "Extraction result: {{ extract_result }}"
+    

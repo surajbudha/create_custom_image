@@ -36,7 +36,7 @@ autoinstall:
     hostname: {{ defult_hostname }}
     password: {{ default_user_password }}
     realname: {{ default_name }}
-    username: {{ default_user}}
+    username: {{ default_user }}
   kernel:
     package: linux-generic
   keyboard:
@@ -92,7 +92,7 @@ autoinstall:
       id: partition-0
       type: partition
     - device: disk-vda
-      size: 21471690752
+      size: -1
       wipe: superblock
       number: 2
       #preserve: false
@@ -109,7 +109,7 @@ autoinstall:
       type: lvm_volgroup
     - name: lv-boot
       volgroup: lvm_volgroup-0
-      size: {{ boot_size }}
+      size: "{{ (boot_size | int * 1024 * 1024) }}B"
       wipe: superblock
       preserve: false
       path: /dev/vg-sys/lv-boot
@@ -122,7 +122,7 @@ autoinstall:
       type: format
     - name: lv-swap
       volgroup: lvm_volgroup-0
-      size: {{ swap_size }}
+      size: {{ (swap_size | int *1024 * 1024) }}
       wipe: superblock
       preserve: false
       path: /dev/vg-sys/lv-swap
