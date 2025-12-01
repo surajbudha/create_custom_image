@@ -13,8 +13,8 @@
       include_tasks: cleanup.yml
 
   rescue:
-    - name: Cleanup after prepwork failure
-      include_tasks: cleanup.yml
+    #- name: Cleanup after prepwork failure
+    #  include_tasks: cleanup.yml
     
     - name: Fail the task
       ansible.builtin.fail:
