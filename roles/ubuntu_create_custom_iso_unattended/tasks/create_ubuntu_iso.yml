@@ -17,6 +17,16 @@
           initrd  /casper/initrd
       }
 
+# Insure ISO destination path exists
+- name: create iso_output_path
+  file:
+    path: "{{ '/'.join(iso_output_path.split('/')[:-1]) }}"
+    state: directory
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rxt
+
+
 #Recreate ISO with autoinstall file
 - name: Recreate ISO with autoinstall file
   shell: >

@@ -56,15 +56,6 @@
     dest: "{{ iso_download_dest }}"
   when: download_needed
 
-# Mount ISO
-- name: Mount base ISO
-  mount:
-    path: "{{ iso_mount_path }}"
-    src: "{{ iso_download_dest }}"
-    #dest: "{{ iso_mount_path }}"
-    fstype: iso9660
-    state: mounted
-
 # Ensure extraction path exists
 - name: Ensure extraction directory exists
   file:

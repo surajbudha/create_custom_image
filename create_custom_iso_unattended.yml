@@ -5,16 +5,16 @@
   become: yes
  
   vars:
-    #flavour: "ubuntu"
-    #major_version: "24"
-    #minor_version: "04.3"
-    #version: "{{ major_version }}.{{ minor_version }}"
-    #arch: "amd64"
-    flavour: "rocky"
-    major_version: "9"
-    minor_version: "6"
+    flavour: "ubuntu"
+    major_version: "24"
+    minor_version: "04.3"
     version: "{{ major_version }}.{{ minor_version }}"
-    arch: "x86_64"
+    arch: "amd64"
+    #flavour: "rocky"
+    #major_version: "9"
+    #minor_version: "6"
+    #version: "{{ major_version }}.{{ minor_version }}"
+    #arch: "x86_64"
 
   tasks:
     - name: Set download iso_download_url
